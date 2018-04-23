@@ -2,7 +2,7 @@
 #include <iostream>
 #include <algorithm>
 #include <vector>
-#include "player.h"
+#include "Player.h"
 
 class Basic_My_Warrior_Characteristics
 {
@@ -132,7 +132,20 @@ public:
 	}
 };
 
-class Warrior
+class Soldier
+{
+public:
+	virtual int get_health() = 0;
+	virtual int get_damage() = 0;
+	int get_range_of_damage();
+	int get_speed();
+	virtual int count_of_alive_soldiers() = 0;
+	void add_soldier();
+	virtual bool health_decrease(int) = 0;
+	virtual void health_increase(int) = 0;
+};
+
+class Warrior: public Soldier
 {
 protected:
 	int health;
@@ -156,15 +169,21 @@ public:
 	{
 		return speed;
 	}
-	virtual bool health_decrease(int count_health) = 0;
-	virtual void health_increase(int count_health) = 0;
+	int count_of_alive_soldiers()
+	{
+		return health > 0;
+	}
+	//bool health_decrease();
+	//void health_increase();
+	//virtual bool health_decrease(int count_health) = 0;
+	//virtual void health_increase(int count_health) = 0;
 	virtual ~Warrior()
 	{
 
 	}
 };
 
-class Archer
+class Archer : public Soldier
 {
 protected:
 	int health;
@@ -188,15 +207,19 @@ public:
 	{
 		return speed;
 	}
-	virtual bool health_decrease(int count_health) = 0;
-	virtual void health_increase(int count_health) = 0;
+	int count_of_alive_soldiers()
+	{
+		return health > 0;
+	}
+	//virtual bool health_decrease(int count_health) = 0;
+	//virtual void health_increase(int count_health) = 0;
 	virtual ~Archer()
 	{
 
 	}
 };
 
-class Wizard
+class Wizard: public Soldier
 {
 protected:
 	int health;
@@ -220,8 +243,12 @@ public:
 	{
 		return speed;
 	}
-	virtual bool health_decrease(int count_health) = 0;
-	virtual void health_increase(int count_health) = 0;
+	int count_of_alive_soldiers()
+	{
+		return health > 0;
+	}
+	//virtual bool health_decrease(int count_health) = 0;
+	//virtual void health_increase(int count_health) = 0;
 	virtual ~Wizard()
 	{
 	}
@@ -257,6 +284,13 @@ public:
 		range_of_damage = basic_my_range_of_damage_warrior;
 		speed = basic_my_speed_warrior;
 	}
+	My_Warrior(My_Warrior* other_warrior)
+	{
+		health = other_warrior->health;
+		damage = other_warrior->damage;
+		range_of_damage = other_warrior->range_of_damage;
+		speed = other_warrior->speed;
+	}
 	~My_Warrior()
 	{
 	}
@@ -268,6 +302,10 @@ public:
 	}
 	void health_increase(int count_health)
 	{
+		if (!count_of_alive_soldiers())
+		{
+			return;
+		}
 		health += count_health;
 		health = std::min(health, basic_my_health_warrior);
 	}
@@ -322,6 +360,13 @@ public:
 		range_of_damage = basic_my_range_of_damage_archer;
 		speed = basic_my_speed_archer;
 	}
+	My_Archer(My_Archer* other_archer)
+	{
+		health = other_archer->health;
+		damage = other_archer->damage;
+		range_of_damage = other_archer->range_of_damage;
+		speed = other_archer->speed;
+	}
 	~My_Archer()
 	{
 
@@ -334,6 +379,10 @@ public:
 	}
 	void health_increase(int count_health)
 	{
+		if (!count_of_alive_soldiers())
+		{
+			return;
+		}
 		health += count_health;
 		health = std::min(health, basic_my_health_archer);
 	}
@@ -388,6 +437,13 @@ public:
 		range_of_damage = basic_my_range_of_damage_wizard;
 		speed = basic_my_speed_wizard;
 	}
+	My_Wizard(My_Wizard* other_wizard)
+	{
+		health = other_wizard->health;
+		damage = other_wizard->damage;
+		range_of_damage = other_wizard->range_of_damage;
+		speed = other_wizard->speed;
+	}
 	~My_Wizard()
 	{
 
@@ -400,6 +456,10 @@ public:
 	}
 	void health_increase(int count_health)
 	{
+		if (!count_of_alive_soldiers())
+		{
+			return;
+		}
 		health += count_health;
 		health = std::min(health, basic_my_health_wizard);
 	}
@@ -443,24 +503,15 @@ public:
 		range_of_damage = basic_enemy_range_of_damage_warrior;
 		speed = basic_enemy_speed_warrior;
 	}
+	Enemy_Warrior(Enemy_Warrior* other_warrior)
+	{
+		health = other_warrior->health;
+		damage = other_warrior->damage;
+		range_of_damage = other_warrior->range_of_damage;
+		speed = other_warrior->speed;
+	}
 	~Enemy_Warrior()
 	{
-	}
-	void info_about_health()
-	{
-		std::cout << "Enemy warrior has " << health << " health\n";
-	}
-	void info_about_damage()
-	{
-		std::cout << "Enemy warrior has " << damage << " damage\n";
-	}
-	void info_about_range_of_damage()
-	{
-		std::cout << "Enemy warrior has " << range_of_damage << " range of damage\n";
-	}
-	void info_about_speed()
-	{
-		std::cout << "Enemy warrior has " << speed << " speed\n";
 	}
 	bool health_decrease(int count_health)
 	{
@@ -470,6 +521,10 @@ public:
 	}
 	void health_increase(int count_health)
 	{
+		if (!count_of_alive_soldiers())
+		{
+			return;
+		}
 		health += count_health;
 		health = std::min(health, basic_enemy_health_warrior);
 	}
@@ -513,25 +568,16 @@ public:
 		range_of_damage = basic_enemy_range_of_damage_archer;
 		speed = basic_enemy_speed_archer;
 	}
+	Enemy_Archer(Enemy_Archer* other_archer)
+	{
+		health = other_archer->health;
+		damage = other_archer->damage;
+		range_of_damage = other_archer->range_of_damage;
+		speed = other_archer->speed;
+	}
 	~Enemy_Archer()
 	{
 
-	}
-	void info_about_health()
-	{
-		std::cout << "Enemy archer has " << health << " health\n";
-	}
-	void info_about_damage()
-	{
-		std::cout << "Enemy archer has " << damage << " damage\n";
-	}
-	void info_about_range_of_damage()
-	{
-		std::cout << "Enemy archer has " << range_of_damage << " range of damage\n";
-	}
-	void info_about_speed()
-	{
-		std::cout << "Enemy archer has " << speed << " speed\n";
 	}
 	bool health_decrease(int count_health)
 	{
@@ -541,6 +587,10 @@ public:
 	}
 	void health_increase(int count_health)
 	{
+		if (!count_of_alive_soldiers())
+		{
+			return;
+		}
 		health += count_health;
 		health = std::min(health, basic_enemy_health_archer);
 	}
@@ -584,6 +634,13 @@ public:
 		range_of_damage = basic_enemy_range_of_damage_wizard;
 		speed = basic_enemy_speed_wizard;
 	}
+	Enemy_Wizard(Enemy_Wizard* other_wizard)
+	{
+		health = other_wizard->health;
+		damage = other_wizard->damage;
+		range_of_damage = other_wizard->range_of_damage;
+		speed = other_wizard->speed;
+	}
 	~Enemy_Wizard()
 	{
 
@@ -596,6 +653,10 @@ public:
 	}
 	void health_increase(int count_health)
 	{
+		if (!count_of_alive_soldiers())
+		{
+			return;
+		}
 		health += count_health;
 		health = std::min(health, basic_enemy_health_wizard);
 	}

@@ -1,29 +1,27 @@
-cmake_minimum_required(VERSION 3.8)
+cmake_minimum_required(VERSION 3.5)
 
 project(TpGame)
 
-target_compile_features(${TARGET} PUBLIC cxx_std_11)
+OPTION(WITH_TEST OFF)
 
-add_definitions(-Wall -O2)
+set(CMAKE_CXX_STANDARD 11)
 
-if(DEBUG)
+if (WITH_TEST)
 
-	set(CMAKE_BUILD_TYPE Debug)
+    add_subdirectory(googletest-master)
 
-else()
+    include_directories(googletest-master/googletest/include)
 
-	set(CMAKE_BUILD_TYPE Release)
+    set(SOURCE_FILES Player.h Army.h Union.h Buf.h test.h test.cpp main.cpp)
 
-endif()
+    add_executable(TpGame ${SOURCE_FILES})
 
-add_executable(main main.cpp army.h player.h test.h)
+    target_link_libraries(TpGame gtest)
 
-if(WITH_TEST)
+else (WITH_TEST)
 
-    add_definitions(-DWITH_TEST)
+    set(SOURCE_FILES Player.h Army.h Union.h Buf.h test.h test.cpp main.cpp)
 
-    target_link_libraries(main gtest)
+    add_executable(TpGame ${SOURCE_FILES})
 
-    target_link_libraries(main pthread)
-
-endif()
+endif(WITH_TEST)

@@ -1,5 +1,4 @@
-#include "pch.h"
-#include "../TpGame/Army.h"
+#include "Buf.h"
 
 TEST(soldier_test, my_warrior) 
 {
@@ -216,6 +215,7 @@ TEST(army_test, my_army)
 	delete army;
 	delete factory;
 	delete player;
+	delete builder;
 }
 
 TEST(army_test, enemy_army)
@@ -240,4 +240,146 @@ TEST(army_test, enemy_army)
 	EXPECT_EQ(army->count_of_soldiers(), 6);
 	delete army;
 	delete factory;
+}
+
+TEST(squad_test, my_squad)
+{
+	My_Warrior* warrior = new My_Warrior;
+	My_Archer* archer = new My_Archer;
+	My_Wizard* wizard = new My_Wizard;
+	My_Squad* squad = create_my_squad(10, 20, 30, warrior, archer, wizard);
+	EXPECT_EQ(squad->count_of_alive_soldiers(), 60);
+	EXPECT_EQ((squad->squad[0])->get_health(), 20);
+	EXPECT_EQ((squad->squad[10])->get_health(), 10);
+	EXPECT_EQ((squad->squad[30])->get_health(), 10);
+	EXPECT_EQ(squad->get_health(), 700);
+	EXPECT_EQ(squad->get_damage(), 440);
+	(squad->squad[0])->health_decrease(20);
+	EXPECT_EQ(squad->count_of_alive_soldiers(), 59);
+	EXPECT_EQ(squad->get_health(), 680);
+	EXPECT_EQ(squad->get_damage(), 430);
+	(squad->squad[10])->health_decrease(10);
+	EXPECT_EQ(squad->count_of_alive_soldiers(), 58);
+	EXPECT_EQ(squad->get_health(), 670);
+	EXPECT_EQ(squad->get_damage(), 425);
+	(squad->squad[30])->health_decrease(10);
+	EXPECT_EQ(squad->count_of_alive_soldiers(), 57);
+	EXPECT_EQ(squad->get_health(), 660);
+	EXPECT_EQ(squad->get_damage(), 417);
+	squad->health_decrease(8);
+	EXPECT_EQ(squad->get_health(), 204);
+	squad->health_increase(5);
+	EXPECT_EQ(squad->get_health(), 489);
+
+}
+
+TEST(squad_test, enemy_squad)
+{
+	Enemy_Warrior* warrior = new Enemy_Warrior;
+	Enemy_Archer* archer = new Enemy_Archer;
+	Enemy_Wizard* wizard = new Enemy_Wizard;
+	Enemy_Squad* squad = create_enemy_squad(10, 20, 30, warrior, archer, wizard);
+	EXPECT_EQ(squad->count_of_alive_soldiers(), 60);
+	EXPECT_EQ((squad->squad[0])->get_health(), 22);
+	EXPECT_EQ((squad->squad[10])->get_health(), 12);
+	EXPECT_EQ((squad->squad[30])->get_health(), 12);
+	EXPECT_EQ(squad->get_health(), 820);
+	EXPECT_EQ(squad->get_damage(), 560);
+	(squad->squad[0])->health_decrease(22);
+	EXPECT_EQ(squad->count_of_alive_soldiers(), 59);
+	EXPECT_EQ(squad->get_health(), 798);
+	EXPECT_EQ(squad->get_damage(), 548);
+	(squad->squad[10])->health_decrease(12);
+	EXPECT_EQ(squad->count_of_alive_soldiers(), 58);
+	EXPECT_EQ(squad->get_health(), 786);
+	EXPECT_EQ(squad->get_damage(), 541);
+	(squad->squad[30])->health_decrease(12);
+	EXPECT_EQ(squad->count_of_alive_soldiers(), 57);
+	EXPECT_EQ(squad->get_health(), 774);
+	EXPECT_EQ(squad->get_damage(), 531);
+	squad->health_decrease(8);
+	EXPECT_EQ(squad->get_health(), 318);
+	squad->health_increase(5);
+	EXPECT_EQ(squad->get_health(), 603);
+	delete squad;
+	delete wizard;
+	delete archer;
+	delete warrior;
+}
+
+TEST(bonus_test, health_bonus)
+{
+	My_Warrior* my_warrior = new My_Warrior;
+	My_Archer* my_archer = new My_Archer;
+	My_Wizard* my_wizard = new My_Wizard;
+	My_Squad* my_squad = create_my_squad(10, 20, 30, my_warrior, my_archer, my_wizard);
+	Enemy_Warrior* enemy_warrior = new Enemy_Warrior;
+	Enemy_Archer* enemy_archer = new Enemy_Archer;
+	Enemy_Wizard* enemy_wizard = new Enemy_Wizard;
+	Enemy_Squad* enemy_squad = create_enemy_squad(30, 20, 10, enemy_warrior, enemy_archer, enemy_wizard);
+	my_squad->health_decrease(8);
+	EXPECT_EQ(my_squad->get_health(), 220);
+	Bonus_For_My_Squad* bonus = new Heal_Decorator(new Bonus(my_squad, NULL, 2));
+	bonus->use_bonus(my_squad, enemy_squad, 2);
+	EXPECT_EQ(my_squad->get_health(), 340);
+	delete bonus;
+	delete enemy_wizard;
+	delete enemy_archer;
+	delete enemy_warrior;
+	delete enemy_squad;
+	delete my_squad;
+	delete my_wizard;
+	delete my_archer;
+	delete my_warrior;
+}
+
+TEST(bonus_test, bomb_bonus)
+{
+	My_Warrior* my_warrior = new My_Warrior;
+	My_Archer* my_archer = new My_Archer;
+	My_Wizard* my_wizard = new My_Wizard;
+	My_Squad* my_squad = create_my_squad(10, 20, 30, my_warrior, my_archer, my_wizard);
+	Enemy_Warrior* enemy_warrior = new Enemy_Warrior;
+	Enemy_Archer* enemy_archer = new Enemy_Archer;
+	Enemy_Wizard* enemy_wizard = new Enemy_Wizard;
+	Enemy_Squad* enemy_squad = create_enemy_squad(30, 20, 10, enemy_warrior, enemy_archer, enemy_wizard);
+	EXPECT_EQ(enemy_squad->get_health(), 1020);
+	Bonus_For_My_Squad* bonus = new Bomb_Decorator(new Bonus(my_squad, enemy_squad, 2));
+	bonus->use_bonus(my_squad, enemy_squad, 2);
+	EXPECT_EQ(enemy_squad->get_health(), 900);
+	delete bonus;
+	delete enemy_wizard;
+	delete enemy_archer;
+	delete enemy_warrior;
+	delete enemy_squad;
+	delete my_squad;
+	delete my_wizard;
+	delete my_archer;
+	delete my_warrior;
+}
+
+TEST(bonus_test, composite_test)
+{
+	My_Warrior* my_warrior = new My_Warrior;
+	My_Archer* my_archer = new My_Archer;
+	My_Wizard* my_wizard = new My_Wizard;
+	My_Squad* my_squad = create_my_squad(10, 20, 30, my_warrior, my_archer, my_wizard);
+	Enemy_Warrior* enemy_warrior = new Enemy_Warrior;
+	Enemy_Archer* enemy_archer = new Enemy_Archer;
+	Enemy_Wizard* enemy_wizard = new Enemy_Wizard;
+	Enemy_Squad* enemy_squad = create_enemy_squad(30, 20, 10, enemy_warrior, enemy_archer, enemy_wizard);
+	my_squad->health_decrease(8);
+	Bonus_For_My_Squad* bonus = new Heal_Decorator(new Bomb_Decorator(new Heal_Decorator(new Bomb_Decorator(new Bonus(my_squad, enemy_squad, 3)))));
+	bonus->use_bonus(my_squad, enemy_squad, 2);
+	EXPECT_EQ(my_squad->get_health(), 460);
+	EXPECT_EQ(enemy_squad->get_health(), 780);
+	delete bonus;
+	delete enemy_wizard;
+	delete enemy_archer;
+	delete enemy_warrior;
+	delete enemy_squad;
+	delete my_squad;
+	delete my_wizard;
+	delete my_archer;
+	delete my_warrior;
 }
