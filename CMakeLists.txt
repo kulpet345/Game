@@ -17,10 +17,10 @@ if (WITH_TEST)
     add_executable(TpGame ${SOURCE_FILES})
 
     target_link_libraries(TpGame gtest)
-
+    target_link_libraries(TpGame pthread)
 else (WITH_TEST)
 
-    set(SOURCE_FILES Player.h Army.h Union.h Buf.h test.h test.cpp main.cpp)
+    set(SOURCE_FILES Player.h Army.h Union.h Buf.h main.cpp)
 
     add_executable(TpGame ${SOURCE_FILES})
 
